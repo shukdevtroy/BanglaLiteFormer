@@ -6,6 +6,8 @@
 <title>BanglaLiteFormer — Bangla E-Commerce Sentiment Analysis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome CDN for LinkedIn & GitHub icons --> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
   :root {
     --ink: #0d1117;
@@ -153,7 +155,7 @@
   .hero-venue::before {
     content: '';
     width: 6px; height: 6px;
-    background: var(--gold);
+    background: #7ed4A8;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -657,7 +659,7 @@
     background: white;
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 1.75rem;
+    padding: 1.25rem;
     text-align: center;
   }
   .author-avatar {
@@ -679,10 +681,34 @@
     word-break: break-all;
   }
 
-.author-email a {
-  text-decoration: none;
-  color: inherit; /* keeps the same text color */
-}
+  .author-email a {
+    text-decoration: none;
+    color: inherit; /* keeps the same text color */
+  }
+
+  .author-email a:hover {
+    text-decoration: underline;
+    color: var(--accent-light); /* changes color on hover */
+  }
+
+  .author-social {
+    margin-top: 0.15rem;
+  }
+
+  .author-social a{
+    font-size: 28px;        /* makes icons bigger */
+    transition: 0.25s;
+    margin: 5px;          /* adds space between icons */
+    display: inline-block;
+  }
+
+  .author-social a:hover{
+    transform: scale(1.2);
+  }
+
+  .linkedin{ color:#0077b5; }
+
+  .github{ color:#333; }
 
   /* ─── CITATION ─── */
   .citation-box {
@@ -800,7 +826,7 @@
   #gradio-shell textarea {
     font-family: 'Hind Siliguri', sans-serif !important;
   }
-  .dex-btn {
+  /* .dex-btn {
     flex: 1;
     min-width: 0;
     background: rgba(255,255,255,0.04);
@@ -822,7 +848,80 @@
     border-color: rgba(124,58,237,0.3);
     color: white;
     transform: translateX(3px);
-  }
+  } */
+
+.demo-container{
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* loader overlay */
+.demo-loader{
+  position: absolute;
+  inset: 0;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: opacity 0.4s ease;
+}
+
+.demo-loader.hide{
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* spinner */
+.spinner{
+  width: 40px;
+  height: 40px;
+  border: 4px solid #eee;
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin{
+  0%{ transform: rotate(0deg); }
+  100%{ transform: rotate(360deg); }
+}
+
+.fullscreen-btn{
+  position: absolute;
+  top: 10px;
+  right: 25px;
+  z-index: 10;
+  border: none;
+  background: #24d3ec;
+  color: black;
+  font-size: 18px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.fullscreen-btn:hover{
+  background: #c4b6fd;
+}
+
+/* FULLSCREEN MODE */
+.demo-container.fullscreen{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  z-index: 9999;
+}
+
+.demo-container.fullscreen iframe{
+  height: 100%;
+}
 
 </style>
 </head>
@@ -840,7 +939,7 @@
       <li><a href="#demo">Demo</a></li>
       <li><a href="#authors">Authors</a></li>
       <li><a href="#conclusion">Conclusion</a></li>
-      <li><a href="https://github.com/shukdevtroy/BanglaLiteFormer/" class="nav-btn">GitHub</a></li>
+      <li><a href="https://github.com/shukdevtroy/BanglaLiteFormer" class="nav-btn">GitHub</a></li>
     </ul>
   </div>
 </nav>
@@ -853,8 +952,8 @@
     <div class="hero-venue">IEEE Transactions on Artificial Intelligence · 2026</div>
     <h1>BanglaLiteFormer: <em>Efficient Sentiment Classification</em> of Bangla E-Commerce Reviews</h1>
     <p class="hero-authors">
-      <strong>Tanjin Adnan Abir</strong> &nbsp;·&nbsp;
-      <strong>Md. Tanvir Mahmud Himel</strong> &nbsp;·&nbsp;
+      <strong>Tanjin Adnan Abir</strong>, Student Member, IEEE &nbsp;·&nbsp;
+      <strong>Md. Tanvir Mahmud Himel</strong>, Student Member, IEEE &nbsp;·&nbsp;
       <strong>Shukdev Datta</strong>, Student Member, IEEE
     </p>
     <div class="hero-metrics">
@@ -1275,20 +1374,34 @@
     </div>
   </section>
 
-
-
   <!-- DEMO -->
   <section id="demo">
     <div class="section-label">Live Demo</div>
     <h2>Bangla Sentiment Analyzer</h2>
-    <p style="max-width: 700px; margin-bottom: 2.5rem;">An interactive Gradio-powered web application that deploys BanglaLiteFormer for real-time sentiment classification. Type or select a Bangla e-commerce review and watch the model analyze it in milliseconds.</p>
 
-    <iframe
-      src="https://shukdev3-banglaliteformer-new-design.hf.space"
-      frameborder="0"
-      width="100%"
-      height="450"
-    ></iframe>
+    <p style="max-width: 700px; margin-bottom: 2.5rem;">
+      An interactive Gradio-powered web application that deploys BanglaLiteFormer for real-time sentiment classification. Type or select a Bangla e-commerce review and watch the model analyze it in milliseconds.
+    </p>
+
+    <div class="demo-container" id="demoBox">
+
+      <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+      <!-- Loader -->
+      <div class="demo-loader" id="demoLoader">
+        <div class="spinner"></div>
+        <p>Loading Demo...</p>
+      </div>
+
+      <iframe
+        src="https://shukdev3-banglaliteformer-new-design.hf.space"
+        frameborder="0"
+        width="100%"
+        height="450"
+        onload="hideLoader()"
+      ></iframe>
+
+    </div>
   </section>
 
   <!-- AUTHORS -->
@@ -1299,20 +1412,23 @@
       <div class="author-card animate delay-1">
         <div class="author-avatar">TAA</div>
         <div class="author-name">Tanjin Adnan Abir</div>
-        <div class="author-affil">M.Sc. Applied Physics &amp; Electronics<br>Jahangirnagar University, Savar, Dhaka</div>
+        <div class="author-affil">M.Sc. Applied Physics &amp; Electronics<br>Jahangirnagar University, Savar, Dhaka<br><em style="font-size:0.75rem; color: var(--accent);">Student Member, IEEE</em></div>
         <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=tanjinadnanabir@gmail.com" target="_blank">📧: tanjinadnanabir@gmail.com</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/tanjinadnanabir/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/tanjinadnanabir" target="_blank" class="github"><i class="fab fa-github"></i> </a></div>
       </div>
       <div class="author-card animate delay-2">
         <div class="author-avatar" style="background: #fde8e6; color: #bf3b2d;">TMH</div>
         <div class="author-name">Md. Tanvir Mahmud Himel</div>
-        <div class="author-affil">B.Sc. Computer Science &amp; Engineering<br>Comilla University, Comilla, Bangladesh</div>
-        <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=mdtanvirmahmudhimel@gmail.com" target="_blank">📧: mdtanvirmahmudhimel@gmail.com</a></div>
+        <div class="author-affil">B.Sc. Computer Science &amp; Engineering<br>Comilla University, Comilla, Bangladesh<br><em style="font-size:0.75rem; color: var(--accent);">Student Member, IEEE</em></div>
+        <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=himel028@stud.cou.ac.bd" target="_blank">📧: himel028@stud.cou.ac.bd</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/-himel/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/404himel" target="_blank" class="github"><i class="fab fa-github"></i></a></div>
       </div>
       <div class="author-card animate delay-3">
         <div class="author-avatar" style="background: var(--gold-pale); color: var(--gold);">SD</div>
         <div class="author-name">Shukdev Datta</div>
         <div class="author-affil">M.Sc. Computer Science &amp; Engineering<br>University of Dhaka, Bangladesh<br><em style="font-size:0.75rem; color: var(--accent);">Student Member, IEEE</em></div>
         <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=shukdev-2021416455@cs.du.ac.bd" target="_blank">📧: shukdev-2021416455@cs.du.ac.bd</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/shukdev-datta-729767144/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/shukdevtroy" target="_blank" class="github"><i class="fab fa-github"></i></a></div>
       </div>
     </div>
   </section>
@@ -1659,6 +1775,34 @@
   window.addEventListener('scroll', () => {
     scrollBtn.classList.toggle('visible', window.scrollY > 300);
   }, { passive: true });
+</script>
+
+<script>
+function toggleFullscreen(){
+  const demo = document.getElementById("demoBox");
+  demo.classList.toggle("fullscreen");
+}
+</script>
+
+<script id="demo-fs-js">
+function toggleFullscreen(){
+  const demo = document.getElementById("demoBox");
+
+  demo.classList.toggle("fullscreen");
+
+  if(demo.classList.contains("fullscreen")){
+    document.body.style.overflow = "hidden";
+  }else{
+    document.body.style.overflow = "auto";
+  }
+}
+</script>
+
+<script>
+function hideLoader(){
+  const loader = document.getElementById("demoLoader");
+  loader.classList.add("hide");
+}
 </script>
 
 </body>
