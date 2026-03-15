@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BanglaLiteFormer — Bangla E-Commerce Sentiment Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --ink: #0d1117;
+    --paper: #f8f5ee;
+    --cream: #f0ece0;
+    --accent: #1a6b3c;
+    --accent-light: #2d9e5f;
+    --accent-pale: #d4edde;
+    --gold: #c9973a;
+    --gold-pale: #fdf3e0;
+    --red: #c0392b;
+    --red-pale: #fde8e6;
+    --blue: #1a4a6b;
+    --blue-pale: #ddeaf5;
+    --muted: #6b6757;
+    --border: #ddd8c8;
+    --code-bg: #1a1e27;
+    --code-fg: #e6e1cf;
+    --shadow: 0 4px 24px rgba(13,17,23,0.10);
+    --shadow-lg: 0 12px 48px rgba(13,17,23,0.16);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: rgba(248,245,238,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.25rem;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: 1rem;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    align-items: center;
+  }
+  .nav-links a {
+    display: block;
+    padding: 0 0.75rem;
+    height: 56px;
+    line-height: 56px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-btn {
+    background: var(--accent);
+    color: white !important;
+    border-radius: 6px;
+    height: 34px !important;
+    line-height: 34px !important;
+    padding: 0 1rem !important;
+    margin-top: 11px;
+    font-weight: 600 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-btn:hover { background: var(--accent-light) !important; color: white !important; }
+
+  /* ─── HAMBURGER ─── */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .hamburger:hover { background: var(--cream); }
+  .hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile nav drawer */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: rgba(248,245,238,0.98);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 199;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 8px 32px rgba(13,17,23,0.12);
+  }
+  .mobile-nav.open { display: block; }
+  .mobile-nav a {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .mobile-nav a:hover { background: var(--cream); color: var(--accent); }
+  .mobile-nav .mobile-nav-btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    background: var(--accent);
+    color: white !important;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    padding: 0.7rem 1rem !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    color: white;
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 40%, rgba(26,107,60,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 60%, rgba(26,74,107,0.30) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 100%, rgba(201,151,58,0.15) 0%, transparent 50%);
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+  .hero-venue {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 0.3rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 1.5rem;
+  }
+  .hero-venue::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #7ed4A8;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.65rem, 5vw, 3.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 em { font-style: italic; color: #7dd4a8; }
+  .hero-authors {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 2rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+  .hero-authors strong { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .hero-metrics {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .hero-metric {
+    padding: 1rem 1.5rem;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    text-align: center;
+    flex: 1 1 120px;
+  }
+  .hero-metric:last-child { border-right: none; }
+  .hero-metric-val {
+    display: block;
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    line-height: 1;
+    color: #7dd4a8;
+    margin-bottom: 0.3rem;
+  }
+  .hero-metric-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+  }
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-white { background: white; color: var(--ink); }
+  .btn-white:hover { background: #e8f5ee; }
+  .btn-outline { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: var(--accent-light); }
+
+  /* ─── LAYOUT ─── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 0 1.25rem; }
+  section { padding: 4rem 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+
+  .section-label {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-pale);
+    padding: 0.2rem 0.7rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+  h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  p { color: #2c2c28; margin-bottom: 1rem; font-size: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ─── ABSTRACT ─── */
+  .abstract-card {
+    background: var(--ink);
+    color: rgba(255,255,255,0.85);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+  .abstract-card::before {
+    content: '"';
+    font-family: 'DM Serif Display', serif;
+    font-size: 10rem;
+    line-height: 1;
+    color: rgba(26,107,60,0.2);
+    position: absolute;
+    top: -1.5rem;
+    left: 1rem;
+    pointer-events: none;
+  }
+  .abstract-card p { color: rgba(255,255,255,0.82); }
+  .abstract-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+  }
+  .tag {
+    background: rgba(26,107,60,0.3);
+    border: 1px solid rgba(26,107,60,0.5);
+    color: #7dd4a8;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── TWO-COL / THREE-COL ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .card-icon {
+    width: 42px; height: 42px;
+    background: var(--accent-pale);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+
+  /* ─── PIPELINE ─── */
+  .pipeline {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .pipeline-step {
+    flex: 1 1 140px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .pipeline-step:last-child { border-right: none; }
+  .pipeline-step::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+    z-index: 2;
+    background: white;
+    padding: 2px;
+  }
+  .pipeline-step:last-child::after { display: none; }
+  .pipeline-num {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 0.6rem;
+  }
+  .pipeline-title { font-weight: 600; font-size: 0.85rem; color: var(--ink); margin-bottom: 0.25rem; }
+  .pipeline-sub { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+  /* ─── ARCHITECTURE DIAGRAM ─── */
+  .arch-diagram {
+    background: var(--ink);
+    border-radius: 16px;
+    padding: 1.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .arch-layer {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 0.84rem;
+  }
+  .arch-layer:last-child { margin-bottom: 0; }
+  .arch-layer-name { font-weight: 600; font-size: 0.82rem; }
+  .arch-layer-dim {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.07);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .arch-layer.highlight { background: rgba(26,107,60,0.3); border-color: rgba(26,107,60,0.6); }
+  .arch-layer.highlight .arch-layer-name { color: #7dd4a8; }
+  .arch-arrow { text-align: center; color: rgba(255,255,255,0.3); font-size: 1.3rem; margin: 0.1rem 0; }
+  .arch-group-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 0.4rem;
+    margin-top: 1rem;
+    padding-left: 0.3rem;
+  }
+  .arch-group-label:first-child { margin-top: 0; }
+
+  /* ─── TABLES ─── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    -webkit-overflow-scrolling: touch;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; background: white; min-width: 500px; }
+  thead { background: var(--ink); color: white; }
+  thead th {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr.best { background: var(--accent-pale); }
+  tbody tr.best td:first-child { border-left: 3px solid var(--accent); }
+  tbody td { padding: 0.75rem 1rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  tbody td.best-val { font-weight: 700; color: var(--accent); }
+  .badge-best {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+
+  /* ─── HYPERPARAMS TABLE ─── */
+  .param-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.45rem;
+  }
+  .param-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0.85rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.84rem;
+    gap: 0.5rem;
+  }
+  .param-key { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+  .param-val { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--accent); font-weight: 500; white-space: nowrap; }
+
+  /* ─── AUGMENTATION ─── */
+  .aug-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+  .aug-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    border-left: 4px solid var(--accent);
+  }
+  .aug-card.gold { border-left-color: var(--gold); }
+  .aug-card.blue { border-left-color: var(--blue); }
+  .aug-card.red { border-left-color: var(--red); }
+  .aug-card h4 { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .aug-card p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+  .aug-example {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    background: var(--cream);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.5;
+  }
+  .aug-example span { color: var(--accent); font-weight: 600; }
+
+  /* ─── RESULTS ─── */
+  .metric-bar-wrap { margin-bottom: 0.85rem; }
+  .metric-bar-header { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 500; margin-bottom: 0.3rem; }
+  .metric-bar-track { height: 8px; background: var(--cream); border-radius: 100px; overflow: hidden; }
+  .metric-bar-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); width: 0; }
+  .metric-bar-fill.gold { background: var(--gold); }
+  .metric-bar-fill.blue { background: var(--blue); }
+
+  /* ─── AUTHORS ─── */
+  .author-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .author-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .author-avatar {
+    width: 60px; height: 60px;
+    background: var(--accent-pale);
+    border-radius: 50%;
+    margin: 0 auto 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+  }
+  .author-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; }
+  .author-affil { font-size: 0.76rem; color: var(--muted); margin-bottom: 0.6rem; }
+  .author-email { font-size: 0.74rem; color: var(--accent); font-family: 'DM Mono', monospace; word-break: break-all; }
+  .author-email a { text-decoration: none; color: inherit; }
+  .author-email a:hover { text-decoration: underline; color: var(--accent-light); }
+  .author-social { margin-top: 0.15rem; }
+  .author-social a { font-size: 26px; transition: 0.25s; margin: 4px; display: inline-block; }
+  .author-social a:hover { transform: scale(1.2); }
+  .linkedin { color: #0077b5; }
+  .github { color: #333; }
+
+  /* ─── CITATION ─── */
+  .citation-box {
+    background: var(--ink);
+    color: var(--code-fg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+  }
+  .copy-citation {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5);
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-citation:hover { background: rgba(255,255,255,0.2); color: white; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 2rem 1.25rem;
+    font-size: 0.82rem;
+  }
+  footer a { color: #7dd4a8; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate { opacity: 0; }
+  .animate.in-view { animation: fadeInUp 0.6s ease forwards; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+
+  /* ─── DATASET STATS STRIP ─── */
+  .stats-strip {
+    display: flex;
+    background: var(--accent);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .strip-item {
+    flex: 1 1 100px;
+    padding: 1rem 1.2rem;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    text-align: center;
+  }
+  .strip-item:last-child { border-right: none; }
+  .strip-val {
+    display: block;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: white;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+  .strip-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.65); font-weight: 500; }
+
+  /* ─── METRICS SLIDER ─── */
+  .metrics-slider-wrap { position: relative; }
+  .mslider-tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    border-bottom: none;
+  }
+  .mslider-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: white;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .mslider-tab:last-child { border-right: none; }
+  .mslider-tab:hover { background: var(--cream); color: var(--accent); }
+  .mslider-tab.active { color: var(--accent); background: var(--accent-pale); border-bottom-color: var(--accent); }
+  .mslider-tab-icon { font-size: 1rem; line-height: 1; }
+  .mslider-outer {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    background: var(--cream);
+    box-shadow: var(--shadow);
+  }
+  .mslider-track {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .mslider-slide { flex: 0 0 100%; width: 100%; padding: 1.75rem 1.5rem 2rem; }
+  .mslider-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    min-height: 280px;
+  }
+  .mslider-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .mslider-card-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-pale);
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+  }
+  .mslider-card-counter { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+  .mslider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+  }
+  .mslider-arrow:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .mslider-arrow:disabled { opacity: 0.3; cursor: default; }
+  .mslider-prev { left: 0.6rem; }
+  .mslider-next { right: 0.6rem; }
+  .mslider-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+  .mslider-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    padding: 0;
+  }
+  .mslider-dot.active { background: var(--accent); width: 24px; border-radius: 100px; }
+  .mslider-dot:hover:not(.active) { background: var(--muted); }
+  .cw-class-block { border-radius: 10px; padding: 1rem 1.1rem; }
+  .cw-class-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .cw-bars { display: flex; flex-direction: column; gap: 0.55rem; }
+  .cw-bar-row { display: flex; align-items: center; gap: 0.6rem; }
+  .cw-bar-label { font-size: 0.75rem; font-weight: 500; color: var(--muted); width: 62px; flex-shrink: 0; }
+  .cw-bar-track { flex: 1; height: 7px; background: rgba(255,255,255,0.6); border-radius: 100px; overflow: hidden; }
+  .cw-bar-fill { height: 100%; border-radius: 100px; width: 0; transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.2s; }
+  .cw-bar-fill.cw-green { background: var(--accent); }
+  .cw-bar-fill.cw-red { background: var(--red); }
+  .cw-bar-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--ink); width: 44px; text-align: right; flex-shrink: 0; }
+  @media (max-width: 640px) {
+    .mslider-tab-label { display: none; }
+    .mslider-tab { padding: 0.75rem 0.5rem; }
+    .mslider-tab-icon { font-size: 1.2rem; }
+    .mslider-tab.active .mslider-tab-label { display: block; font-size: 0.72rem; }
+    .mslider-arrow { width: 30px; height: 30px; font-size: 0.85rem; }
+    .mslider-card { padding: 1.1rem; min-height: unset; }
+    .mslider-slide { padding: 1.25rem 1rem 1.5rem; }
+  }
+
+  /* ─── CONFUSION MATRIX VIZ ─── */
+  .cm-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 4px;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  .cm-cell { padding: 0.85rem; text-align: center; border-radius: 6px; font-weight: 700; font-size: 1rem; }
+  .cm-label { display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .cm-tp { background: var(--accent-pale); color: var(--accent); }
+  .cm-fn { background: var(--red-pale); color: var(--red); }
+  .cm-fp { background: var(--gold-pale); color: var(--gold); }
+  .cm-tn { background: var(--accent-pale); color: var(--accent); }
+  .cm-sub { font-size: 0.64rem; font-weight: 400; color: var(--muted); display: block; margin-top: 0.1rem; }
+
+  /* ─── DEMO SECTION ─── */
+  @keyframes demofadein { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+
+  #gradio-shell textarea { font-family: 'Hind Siliguri', sans-serif !important; }
+
+  .demo-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .demo-loader {
+    position: absolute;
+    inset: 0;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: opacity 0.4s ease;
+  }
+  .demo-loader.hide { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #eee;
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin { 0%{ transform: rotate(0deg); } 100%{ transform: rotate(360deg); } }
+
+  .fullscreen-btn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    z-index: 10;
+    border: none;
+    background: #24d3ec;
+    color: black;
+    font-size: 18px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .fullscreen-btn:hover { background: #c4b6fd; }
+
+  .demo-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: white;
+    z-index: 9999;
+    border-radius: 0;
+  }
+  .demo-container.fullscreen iframe { height: 100%; }
+
+  /* ─── SCROLL TO TOP ─── */
+  #scroll-top-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 999;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(26,107,60,0.4);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s ease;
+    pointer-events: none;
+  }
+  #scroll-top-btn.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  #scroll-top-btn:hover { background: var(--accent-light); box-shadow: 0 6px 24px rgba(26,107,60,0.5); }
+  #scroll-top-btn:active { transform: scale(0.93); }
+
+  /* ════════════════════════════════════════
+     ─── RESPONSIVE BREAKPOINTS ───
+  ════════════════════════════════════════ */
+
+  /* ── LARGE TABLET (≤ 1024px) ── */
+  @media (max-width: 1024px) {
+    .nav-links a { padding: 0 0.55rem; font-size: 0.74rem; }
+    .two-col { gap: 2rem; }
+    .three-col { gap: 1rem; }
+  }
+
+  /* ── TABLET (≤ 900px) ── */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+
+    .hero { padding: 4rem 1.25rem 3rem; }
+
+    .two-col { grid-template-columns: 1fr; gap: 2rem; }
+    .three-col { grid-template-columns: repeat(2, 1fr); }
+    .author-cards { grid-template-columns: repeat(2, 1fr); }
+
+    .pipeline { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .pipeline-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .pipeline-step:nth-child(3), .pipeline-step:nth-child(6) { border-right: none; }
+    .pipeline-step:nth-child(1), .pipeline-step:nth-child(2), .pipeline-step:nth-child(3) { border-bottom: 1px solid var(--border); }
+    .pipeline-step:nth-child(4), .pipeline-step:nth-child(5), .pipeline-step:nth-child(6) { border-bottom: none; }
+    .pipeline-step::after { display: none; }
+
+    .abstract-card { padding: 1.5rem 1.5rem; }
+    .abstract-card::before { font-size: 8rem; }
+  }
+
+  /* ── MOBILE (≤ 640px) ── */
+  @media (max-width: 640px) {
+    .page { padding: 0 1rem; }
+    section { padding: 2.5rem 0; }
+
+    /* Hero */
+    .hero { padding: 3rem 1rem 2.5rem; }
+    .hero-venue { font-size: 0.65rem; padding: 0.25rem 0.75rem; }
+    .hero h1 { font-size: 1.7rem; margin-bottom: 1rem; }
+    .hero-authors { font-size: 0.82rem; }
+    .hero-metric { flex: 1 1 50%; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .hero-metric:nth-child(2n) { border-right: none; }
+    .hero-metric:nth-last-child(-n+2) { border-bottom: none; }
+    .hero-metric-val { font-size: 1.5rem; }
+    .hero-actions { gap: 0.5rem; }
+    .btn { font-size: 0.8rem; padding: 0.55rem 1rem; }
+
+    /* Abstract */
+    .abstract-card { padding: 1.25rem; font-size: 0.92rem; }
+    .abstract-card::before { font-size: 6rem; top: -0.5rem; }
+    .abstract-tags { gap: 0.35rem; }
+    .tag { font-size: 0.68rem; }
+
+    /* Section headers */
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.1rem; }
+
+    /* Pipeline: single column on mobile */
+    .pipeline { display: flex; flex-direction: column; }
+    .pipeline-step { border-right: none; border-bottom: 1px solid var(--border); padding: 1rem; }
+    .pipeline-step:last-child { border-bottom: none; }
+    .pipeline-step::after {
+      content: '↓';
+      position: absolute;
+      right: auto;
+      left: 50%;
+      bottom: -14px;
+      top: auto;
+      transform: translateX(-50%);
+      background: white;
+      padding: 0 4px;
+      display: block;
+    }
+    .pipeline-step:last-child::after { display: none; }
+
+    /* Augmentation */
+    .aug-cards { grid-template-columns: 1fr; }
+    .aug-card { padding: 1rem; }
+
+    /* Stats strip */
+    .stats-strip { flex-direction: column; }
+    .strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .strip-item:last-child { border-bottom: none; }
+
+    /* Architecture */
+    .arch-diagram { padding: 1rem; }
+    .arch-layer { padding: 0.55rem 0.75rem; flex-direction: row; flex-wrap: wrap; gap: 0.3rem; }
+    .arch-layer-name { font-size: 0.78rem; }
+    .arch-layer-dim { font-size: 0.65rem; }
+
+    /* Params grid */
+    .param-grid { grid-template-columns: 1fr; }
+
+    /* Stats cards */
+    .three-col { grid-template-columns: 1fr; }
+    .stat-num { font-size: 2.2rem; }
+
+    /* Confusion matrix */
+    .cm-cell { padding: 0.65rem; font-size: 0.9rem; }
+    .cm-label { font-size: 0.6rem; }
+
+    /* Author cards */
+    .author-cards { grid-template-columns: 1fr; }
+    .author-card { padding: 1.25rem; }
+
+    /* Tables — scroll hint */
+    .table-wrap { position: relative; }
+    .table-wrap::after {
+      content: '← scroll →';
+      display: block;
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--muted);
+      padding: 0.4rem;
+      background: var(--cream);
+      letter-spacing: 0.06em;
+    }
+
+    /* Conclusion cards */
+    .card { padding: 1.25rem; }
+
+    /* Conclusion closing box */
+    #conclusion > div:last-child > div > div { padding: 1.5rem 1.25rem !important; }
+
+    /* Demo iframe height on mobile */
+    .demo-container iframe { height: 520px; }
+    .fullscreen-btn { font-size: 15px; padding: 4px 8px; top: 8px; right: 12px; }
+
+    /* Footer */
+    footer { padding: 1.5rem 1rem; font-size: 0.78rem; }
+
+    /* Preprocessing box */
+    .card pre, .card code { font-size: 0.72rem; }
+
+    /* Scroll top btn */
+    #scroll-top-btn { bottom: 1rem; right: 1rem; width: 40px; height: 40px; }
+  }
+
+  /* ── EXTRA SMALL (≤ 380px) ── */
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 1.45rem; }
+    .hero-metric-val { font-size: 1.3rem; }
+    .btn { font-size: 0.75rem; padding: 0.5rem 0.85rem; }
+    .nav-logo { font-size: 1rem; }
+    .author-social a { font-size: 22px; }
+    .hero-metric { flex: 1 1 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .hero-metric:last-child { border-bottom: none; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">BanglaLiteFormer</div>
+    <ul class="nav-links">
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#methodology">Methodology</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#authors">Authors</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+      <li><a href="https://github.com/shukdevtroy/BanglaLiteFormer" class="nav-btn">GitHub</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV DRAWER -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#abstract" onclick="closeMobileNav()">Abstract</a>
+  <a href="#methodology" onclick="closeMobileNav()">Methodology</a>
+  <a href="#architecture" onclick="closeMobileNav()">Architecture</a>
+  <a href="#results" onclick="closeMobileNav()">Results</a>
+  <a href="#demo" onclick="closeMobileNav()">Demo</a>
+  <a href="#authors" onclick="closeMobileNav()">Authors</a>
+  <a href="#conclusion" onclick="closeMobileNav()">Conclusion</a>
+  <a href="https://github.com/shukdevtroy/BanglaLiteFormer" class="mobile-nav-btn">⭐ GitHub</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-venue">IEEE Transactions on Artificial Intelligence · 2026</div>
+    <h1>BanglaLiteFormer: <em>Efficient Sentiment Classification</em> of Bangla E-Commerce Reviews</h1>
+    <p class="hero-authors">
+      <strong>Tanjin Adnan Abir</strong>, Student Member, IEEE &nbsp;·&nbsp;
+      <strong>Md. Tanvir Mahmud Himel</strong>, Student Member, IEEE &nbsp;·&nbsp;
+      <strong>Shukdev Datta</strong>, Student Member, IEEE
+    </p>
+    <div class="hero-metrics">
+      <div class="hero-metric">
+        <span class="hero-metric-val">97.00%</span>
+        <span class="hero-metric-label">Test Accuracy</span>
+      </div>
+      <div class="hero-metric">
+        <span class="hero-metric-val">99.48%</span>
+        <span class="hero-metric-label">Avg Confidence</span>
+      </div>
+      <div class="hero-metric">
+        <span class="hero-metric-val">4,370</span>
+        <span class="hero-metric-label">Augmented Samples</span>
+      </div>
+      <div class="hero-metric">
+        <span class="hero-metric-val">~150K</span>
+        <span class="hero-metric-label">Parameters</span>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <a href="#demo" class="btn btn-white">🚀 Try the Demo</a>
+      <a href="#results" class="btn btn-outline">📊 See Results</a>
+      <a href="#conclusion" class="btn btn-outline">📝 Conclusion</a>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="page">
+
+  <!-- ABSTRACT -->
+  <section id="abstract">
+    <div class="section-label">Abstract</div>
+    <div class="abstract-card animate">
+      <p>Understanding Bengali-speaking consumers' perspectives through sentiment analysis of Bangla e-commerce product reviews is significant for making better business decisions. In this research, a lightweight transformer architecture, <strong style="color:#7dd4a8">BanglaLiteFormer</strong>, is proposed to investigate sentiment analysis on Bangla e-commerce product reviews.</p>
+      <p>We collected an existing dataset of 1,631 reviews. To overcome dataset size constraints, we performed data augmentation strategies, including template-based generation; neural paraphrasing with pretrained multilingual models (mT5, mBART, and BanglaT5); back-translation techniques; and supervised fine-tuning of LLMs with semantic filtering. Our augmentation pipeline expanded the dataset to <strong style="color:#7dd4a8">4,370 samples</strong>.</p>
+      <p>BanglaLiteFormer combines token and positional embeddings, multi-head self-attention mechanisms, and hybrid pooling strategies to capture both explicit and implicit attitudes in user-generated content. We achieved <strong style="color:#7dd4a8">97.00% test accuracy</strong> with near-perfect prediction confidence (99.48%), outperforming Bangla-BERT, GRU, LSTM, and transformer ensemble methods.</p>
+      <div class="abstract-tags">
+        <span class="tag">Sentiment Analysis</span>
+        <span class="tag">Transformer</span>
+        <span class="tag">NLP</span>
+        <span class="tag">Bangla / Bengali</span>
+        <span class="tag">E-Commerce</span>
+        <span class="tag">Low-Resource NLP</span>
+        <span class="tag">Data Augmentation</span>
+        <span class="tag">TensorFlow / Keras</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHODOLOGY -->
+  <section id="methodology">
+    <div class="section-label">Methodology</div>
+    <h2>End-to-End Pipeline</h2>
+    <div class="pipeline animate">
+      <div class="pipeline-step">
+        <div class="pipeline-num">1</div>
+        <div class="pipeline-title">Data Collection</div>
+        <div class="pipeline-sub">1,631 hand-labeled Bangla e-commerce reviews</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">2</div>
+        <div class="pipeline-title">Augmentation</div>
+        <div class="pipeline-sub">Template, paraphrase, back-translate, LLM fine-tune</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">3</div>
+        <div class="pipeline-title">Preprocessing</div>
+        <div class="pipeline-sub">Normalize, filter, stopword removal</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">4</div>
+        <div class="pipeline-title">Tokenization</div>
+        <div class="pipeline-sub">Vocab 8,000 · maxlen 80</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">5</div>
+        <div class="pipeline-title">Model Training</div>
+        <div class="pipeline-sub">BanglaLiteFormer + early stopping</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">6</div>
+        <div class="pipeline-title">Evaluation</div>
+        <div class="pipeline-sub">97% accuracy · F1 0.97</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top: 3.5rem;">
+      <div>
+        <h3>Data Augmentation Strategy</h3>
+        <p>To overcome data scarcity in the low-resource Bangla setting, we developed a four-stage hybrid synthetic data generation framework:</p>
+        <div class="aug-cards" style="margin-top: 1rem;">
+          <div class="aug-card">
+            <h4>🧩 Template Synthesis</h4>
+            <p>Polarity-specific lexical markers combined with authentic review fragments for controlled concatenation.</p>
+            <div class="aug-example">"পণ্যটি ভালো" → <span>"পণ্যটি সত্যিই অসাধারণ"</span></div>
+          </div>
+          <div class="aug-card gold">
+            <h4>🔀 Neural Paraphrasing</h4>
+            <p>mT5, mBART, BanglaT5 with top-k and nucleus sampling for linguistic variability.</p>
+            <div class="aug-example">"এই পণ্যটি খুব ভালো" → <span>"পণ্যটি সত্যিই প্রশংসনীয়"</span></div>
+          </div>
+          <div class="aug-card blue">
+            <h4>🌐 Back-Translation</h4>
+            <p>Bangla → English → Bangla via NMT models generating semantically equivalent but linguistically diverse samples.</p>
+            <div class="aug-example">Bangla <span>→ EN →</span> Bangla</div>
+          </div>
+          <div class="aug-card red">
+            <h4>🤖 LLM Fine-Tuning</h4>
+            <p>Qwen 2.5–7B and Bangla-GPT fine-tuned to generate realistic reviews, filtered by semantic similarity.</p>
+            <div class="aug-example">Qwen 2.5-7B + <span>Bangla-GPT</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Text Preprocessing</h3>
+        <p>A domain-specific preprocessing pipeline tailored to Bangla's morphological and orthographic properties:</p>
+        <div class="card" style="margin-top: 1rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">1</div>
+              <div style="font-size:0.9rem;"><strong>Type validation</strong> — convert all inputs to string type</div>
+            </div>
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">2</div>
+              <div style="font-size:0.9rem;"><strong>Whitespace removal</strong> — regex-based elimination of tabs, newlines, extra spaces</div>
+            </div>
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">3</div>
+              <div style="font-size:0.9rem;"><strong>Character filtering</strong> — retain Bangla (U+0980–U+09FF), English, digits; remove punctuation &amp; emoji</div>
+            </div>
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">4</div>
+              <div style="font-size:0.9rem;"><strong>Lowercase</strong> — normalize English characters to avoid duplicate tokens</div>
+            </div>
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">5</div>
+              <div style="font-size:0.9rem;"><strong>Stopword removal</strong> — custom Bangla stopword list (এবং, যে, এই, …)</div>
+            </div>
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; background: var(--accent-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 0.1rem;">6</div>
+              <div style="font-size:0.9rem;"><strong>Rejoin</strong> — cleaned tokens rejoined for tokenization</div>
+            </div>
+            <div style="background: var(--cream); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.75rem; margin-top: 0.3rem; overflow-wrap: break-word; word-break: break-word;">
+              <span style="color: var(--red);">"এই প্রোডাক্টটা অনেক ভালো!!! 😊😊"</span><br>
+              <span style="color: var(--muted);">↓ after preprocessing</span><br>
+              <span style="color: var(--accent);">"প্রোডাক্টটা ভালো"</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <h3>Dataset Statistics</h3>
+          <div class="stats-strip" style="margin-top: 1rem;">
+            <div class="strip-item">
+              <span class="strip-val">1,631</span>
+              <span class="strip-label">Original Reviews</span>
+            </div>
+            <div class="strip-item">
+              <span class="strip-val">4,370</span>
+              <span class="strip-label">After Augmentation</span>
+            </div>
+            <div class="strip-item">
+              <span class="strip-val">51/49</span>
+              <span class="strip-label">Positive/Negative %</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2>BanglaLiteFormer Architecture</h2>
+    <p style="max-width: 680px; margin-bottom: 2rem;">A purposefully lightweight single-block transformer designed to balance representational capacity against overfitting risk on small, domain-specific datasets. ~150,000 parameters vs. Bangla-BERT's ~110M — with a <strong>27× lower generalization error bound</strong>.</p>
+
+    <div class="two-col">
+      <div>
+        <div class="arch-diagram">
+          <div class="arch-group-label">Output</div>
+          <div class="arch-layer highlight">
+            <span class="arch-layer-name">Softmax Output</span>
+            <span class="arch-layer-dim">2 classes</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Dense (ReLU) + Dropout</span>
+            <span class="arch-layer-dim">32 neurons</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-group-label">Feature Aggregation</div>
+          <div class="arch-layer highlight">
+            <span class="arch-layer-name">Concatenate [Avg ‖ Max]</span>
+            <span class="arch-layer-dim">embed_dim × 2</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap: 4px; margin: 4px 0;">
+            <div class="arch-layer" style="margin:0; border-radius:8px;">
+              <span class="arch-layer-name" style="font-size:0.75rem;">Global Avg Pool</span>
+              <span class="arch-layer-dim">embed_dim</span>
+            </div>
+            <div class="arch-layer" style="margin:0; border-radius:8px;">
+              <span class="arch-layer-name" style="font-size:0.75rem;">Global Max Pool</span>
+              <span class="arch-layer-dim">embed_dim</span>
+            </div>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-group-label">Transformer Block</div>
+          <div class="arch-layer highlight">
+            <span class="arch-layer-name">LayerNorm + Residual</span>
+            <span class="arch-layer-dim">maxlen × 32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Feed-Forward (ReLU)</span>
+            <span class="arch-layer-dim">ff_dim=32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">LayerNorm + Residual</span>
+            <span class="arch-layer-dim">maxlen × 32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer highlight">
+            <span class="arch-layer-name">Multi-Head Attention</span>
+            <span class="arch-layer-dim">heads=2, dk=32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Dropout (0.2)</span>
+            <span class="arch-layer-dim">maxlen × 32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-group-label">Embedding</div>
+          <div class="arch-layer highlight">
+            <span class="arch-layer-name">Token + Positional Embedding</span>
+            <span class="arch-layer-dim">maxlen × 32</span>
+          </div>
+          <div class="arch-arrow">↑</div>
+          <div class="arch-layer">
+            <span class="arch-layer-name">Input (Padded Tokens)</span>
+            <span class="arch-layer-dim">maxlen=80</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Key Design Decisions</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 2rem;">
+          <div class="card">
+            <div class="card-icon">🎯</div>
+            <h4 style="font-weight: 700; margin-bottom: 0.4rem;">Hybrid Pooling Strategy</h4>
+            <p style="font-size: 0.86rem;">Combines global average pooling (overall sentiment consistency) with global max pooling (prominent emotional signals) — outperforming either alone.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">⚡</div>
+            <h4 style="font-weight: 700; margin-bottom: 0.4rem;">144× Less Computation Than BERT</h4>
+            <p style="font-size: 0.86rem;">With dk=32 and h=2, attention operations = 409,600 vs BERT-base's 58,982,400 — enabling real-time deployment.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧠</div>
+            <h4 style="font-weight: 700; margin-bottom: 0.4rem;">Single Transformer Block</h4>
+            <p style="font-size: 0.86rem;">Theoretically justified by statistical learning theory — generalization error bound ~27× lower than Bangla-BERT on our dataset size.</p>
+          </div>
+        </div>
+
+        <h3>Hyperparameters</h3>
+        <div class="param-grid" style="margin-top: 1rem;">
+          <div class="param-row"><span class="param-key">Embed dim</span><span class="param-val">32</span></div>
+          <div class="param-row"><span class="param-key">Attention heads</span><span class="param-val">2</span></div>
+          <div class="param-row"><span class="param-key">FF dim</span><span class="param-val">32</span></div>
+          <div class="param-row"><span class="param-key">Transformer depth</span><span class="param-val">1 block</span></div>
+          <div class="param-row"><span class="param-key">Max seq length</span><span class="param-val">80</span></div>
+          <div class="param-row"><span class="param-key">Vocab size</span><span class="param-val">8,000</span></div>
+          <div class="param-row"><span class="param-key">Dropout</span><span class="param-val">0.2–0.3</span></div>
+          <div class="param-row"><span class="param-key">Optimizer</span><span class="param-val">Adam</span></div>
+          <div class="param-row"><span class="param-key">Learning rate</span><span class="param-val">0.001</span></div>
+          <div class="param-row"><span class="param-key">Batch size</span><span class="param-val">24</span></div>
+          <div class="param-row"><span class="param-key">Max epochs</span><span class="param-val">50</span></div>
+          <div class="param-row"><span class="param-key">Early stop patience</span><span class="param-val">10</span></div>
+          <div class="param-row"><span class="param-key">Dense layer</span><span class="param-val">32, ReLU</span></div>
+          <div class="param-row"><span class="param-key">Output</span><span class="param-val">2, Softmax</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results">
+    <div class="section-label">Results &amp; Discussion</div>
+    <h2>Experimental Results</h2>
+
+    <div class="three-col" style="margin-bottom: 2.5rem;">
+      <div class="stat-card animate delay-1">
+        <div class="stat-num">97.00%</div>
+        <div class="stat-label">Test Accuracy</div>
+      </div>
+      <div class="stat-card animate delay-2">
+        <div class="stat-num">0.9706</div>
+        <div class="stat-label">Positive F1-Score</div>
+      </div>
+      <div class="stat-card animate delay-3">
+        <div class="stat-num">0.9692</div>
+        <div class="stat-label">Negative F1-Score</div>
+      </div>
+    </div>
+
+    <!-- ─── METRICS SLIDER ─── -->
+    <div class="metrics-slider-wrap" style="margin-bottom: 2.5rem;">
+
+      <!-- Tab Nav -->
+      <div class="mslider-tabs">
+        <button class="mslider-tab active" data-slide="0">
+          <span class="mslider-tab-icon">📊</span>
+          <span class="mslider-tab-label">Performance Metrics</span>
+        </button>
+        <button class="mslider-tab" data-slide="1">
+          <span class="mslider-tab-icon">🔲</span>
+          <span class="mslider-tab-label">Confusion Matrix</span>
+        </button>
+        <button class="mslider-tab" data-slide="2">
+          <span class="mslider-tab-icon">📋</span>
+          <span class="mslider-tab-label">Class-wise Performance</span>
+        </button>
+      </div>
+
+      <!-- Slider Track -->
+      <div class="mslider-outer">
+        <div class="mslider-track" id="metricsTrack">
+
+          <!-- SLIDE 1 — Performance Metrics -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">BanglaLiteFormer · Test Set</span>
+                <span class="mslider-card-counter">1 / 3</span>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Accuracy</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Precision</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Recall</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>F1-Score (Weighted)</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Avg Prediction Confidence</span><span style="color:var(--gold);font-weight:700;">99.48%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill gold" data-width="99.48"></div></div>
+              </div>
+              <div class="metric-bar-wrap" style="margin-bottom:0;">
+                <div class="metric-bar-header"><span>Validation Accuracy</span><span style="color:var(--blue);font-weight:700;">98.57%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill blue" data-width="98.57"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 2 — Confusion Matrix -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">Test Set · 632 Samples</span>
+                <span class="mslider-card-counter">2 / 3</span>
+              </div>
+              <!-- PREDICTED → label at top -->
+              <p style="font-size:0.72rem;text-align:center;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Predicted →</p>
+
+              <!-- Outer flex: [← Actual label] + [full grid] -->
+              <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+
+                <!-- ← Actual rotated label on the LEFT -->
+                <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;">← Actual</div>
+
+                <!-- Grid: 3 columns — row-label | col1 | col2 -->
+                <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:5px;flex:1;max-width:340px;">
+
+                  <!-- Header row -->
+                  <div></div><!-- top-left empty corner -->
+                  <div style="text-align:center;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:0.3rem 0;">Negative</div>
+                  <div style="text-align:center;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:0.3rem 0;">Positive</div>
+
+                  <!-- Row 1: Negative actual -->
+                  <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Negative</div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">299<span class="cm-sub">True Neg</span></div>
+                  <div class="cm-cell cm-fn" style="font-size:1.4rem;padding:1rem;">10<span class="cm-sub">False Pos</span></div>
+
+                  <!-- Row 2: Positive actual -->
+                  <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Positive</div>
+                  <div class="cm-cell cm-fp" style="font-size:1.4rem;padding:1rem;">9<span class="cm-sub">False Neg</span></div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">314<span class="cm-sub">True Pos</span></div>
+
+                </div><!-- /grid -->
+              </div><!-- /flex -->
+              <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;margin-left: 60px;">
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--accent-pale);border-radius:10px;border:1px solid rgba(26,107,60,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--accent);line-height:1;">613</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Correct</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--red-pale);border-radius:10px;border:1px solid rgba(192,57,43,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--red);line-height:1;">19</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Errors</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--gold-pale);border-radius:10px;border:1px solid rgba(201,151,58,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--gold);line-height:1;">&lt;2%</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Error Rate</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 3 — Class-wise Performance -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">Per-Class Breakdown</span>
+                <span class="mslider-card-counter">3 / 3</span>
+              </div>
+              <!-- Negative class -->
+              <div class="cw-class-block" style="border-left:4px solid var(--red);background:var(--red-pale);">
+                <div class="cw-class-title" style="color:var(--red);">😠 Negative Class <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">Support: 309</span></div>
+                <div class="cw-bars">
+                  <div class="cw-bar-row"><span class="cw-bar-label">Precision</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="97.08"></div></div><span class="cw-bar-val">0.9708</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">Recall</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="96.76"></div></div><span class="cw-bar-val">0.9676</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">F1-Score</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="96.92"></div></div><span class="cw-bar-val">0.9692</span></div>
+                </div>
+              </div>
+              <!-- Positive class -->
+              <div class="cw-class-block" style="border-left:4px solid var(--accent);background:var(--accent-pale);margin-top:1rem;margin-bottom:0;">
+                <div class="cw-class-title" style="color:var(--accent);">😊 Positive Class <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">Support: 323</span></div>
+                <div class="cw-bars">
+                  <div class="cw-bar-row"><span class="cw-bar-label">Precision</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="96.91"></div></div><span class="cw-bar-val">0.9691</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">Recall</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="97.21"></div></div><span class="cw-bar-val">0.9721</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">F1-Score</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="97.06"></div></div><span class="cw-bar-val">0.9706</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /track -->
+
+        <!-- Arrow buttons -->
+        <button class="mslider-arrow mslider-prev" id="metricsPrev" onclick="moveSlide(-1)" aria-label="Previous">&#8592;</button>
+        <button class="mslider-arrow mslider-next" id="metricsNext" onclick="moveSlide(1)" aria-label="Next">&#8594;</button>
+      </div>
+
+      <!-- Dot indicators -->
+      <div class="mslider-dots">
+        <button class="mslider-dot active" data-slide="0" onclick="goSlide(0)"></button>
+        <button class="mslider-dot" data-slide="1" onclick="goSlide(1)"></button>
+        <button class="mslider-dot" data-slide="2" onclick="goSlide(2)"></button>
+      </div>
+
+    </div><!-- /metrics-slider-wrap -->
+
+    <h3 style="margin-bottom: 1rem;">Comparison with Ahmed et al. (2023) — Retrained on Our Dataset</h3>
+    <div class="table-wrap animate" style="margin-bottom: 2rem;">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GRU (Word2Vec) [Ahmed et al.]</td><td>95.72%</td><td>95.74%</td><td>95.72%</td><td>95.72%</td></tr>
+          <tr><td>BiLSTM (Word2Vec) [Ahmed et al.]</td><td>95.24%</td><td>95.26%</td><td>95.24%</td><td>95.24%</td></tr>
+          <tr><td>Bangla-BERT [Ahmed et al.]</td><td>96.20%</td><td>96.26%</td><td>96.20%</td><td>96.20%</td></tr>
+          <tr class="best"><td><strong>BanglaLiteFormer (Ours)</strong><span class="badge-best">Best</span></td><td class="best-val">97.00%</td><td class="best-val">97.00%</td><td class="best-val">97.00%</td><td class="best-val">97.00%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-bottom: 1rem;">Comparison with Hoque et al. (2024) — Retrained on Our Dataset</h3>
+    <div class="table-wrap animate" style="margin-bottom: 2rem;">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>mBERT [Hoque et al.]</td><td>93.83%</td><td>93.90%</td><td>93.83%</td><td>93.83%</td></tr>
+          <tr><td>XLM-R-base [Hoque et al.]</td><td>95.14%</td><td>95.25%</td><td>95.14%</td><td>95.14%</td></tr>
+          <tr><td>BanglaBERT [Hoque et al.]</td><td>96.33%</td><td>96.32%</td><td>96.33%</td><td>96.32%</td></tr>
+          <tr><td>Transformer Ensemble [Hoque et al.]</td><td>96.68%</td><td>96.77%</td><td>96.68%</td><td>96.68%</td></tr>
+          <tr class="best"><td><strong>BanglaLiteFormer (Ours)</strong><span class="badge-best">Best</span></td><td class="best-val">97.00%</td><td class="best-val">97.00%</td><td class="best-val">97.00%</td><td class="best-val">97.00%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-bottom: 1rem;">Training vs. Validation Accuracy — All Models</h3>
+    <div class="table-wrap animate">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Train Acc.</th><th>Val Acc.</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GRU [Ahmed et al.]</td><td>98.70%</td><td>96.17%</td></tr>
+          <tr><td>BiLSTM [Ahmed et al.]</td><td>98.39%</td><td>95.64%</td></tr>
+          <tr><td>BanglaBERT [Ahmed et al.]</td><td>99.97%</td><td>96.44%</td></tr>
+          <tr><td>mBERT [Hoque et al.]</td><td>99.93%</td><td>94.52%</td></tr>
+          <tr><td>BanglaBERT [Hoque et al.]</td><td>99.97%</td><td>95.95%</td></tr>
+          <tr><td>XLM-R-base [Hoque et al.]</td><td>99.83%</td><td>95.48%</td></tr>
+          <tr><td>Transformer Ensemble [Hoque et al.]</td><td>99.97%</td><td>96.43%</td></tr>
+          <tr class="best"><td><strong>BanglaLiteFormer (Ours)</strong><span class="badge-best">Best</span></td><td class="best-val">100.00%</td><td class="best-val">98.57%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo">
+    <div class="section-label">Live Demo</div>
+    <h2>Bangla Sentiment Analyzer</h2>
+    <p style="max-width: 700px; margin-bottom: 2rem;">
+      An interactive Gradio-powered web application that deploys BanglaLiteFormer for real-time sentiment classification. Type or select a Bangla e-commerce review and watch the model analyze it in milliseconds.
+    </p>
+
+    <div class="demo-container" id="demoBox">
+      <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+      <div class="demo-loader" id="demoLoader">
+        <div class="spinner"></div>
+        <p>Loading Demo...</p>
+      </div>
+      <iframe
+        src="https://shukdev3-banglaliteformer-new-design.hf.space"
+        frameborder="0"
+        width="100%"
+        height="450"
+        onload="hideLoader()"
+      ></iframe>
+    </div>
+  </section>
+
+  <!-- AUTHORS -->
+  <section id="authors">
+    <div class="section-label">Authors</div>
+    <h2>Research Team</h2>
+    <div class="author-cards">
+      <div class="author-card animate delay-1">
+        <div class="author-avatar">TAA</div>
+        <div class="author-name">Tanjin Adnan Abir</div>
+        <div class="author-affil">M.Sc. Applied Physics &amp; Electronics<br>Jahangirnagar University, Savar, Dhaka<br><em style="font-size:0.72rem; color: var(--accent);">Student Member, IEEE</em></div>
+        <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=tanjinadnanabir@gmail.com" target="_blank">📧 tanjinadnanabir@gmail.com</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/tanjinadnanabir/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/tanjinadnanabir" target="_blank" class="github"><i class="fab fa-github"></i></a></div>
+      </div>
+      <div class="author-card animate delay-2">
+        <div class="author-avatar" style="background: #fde8e6; color: #bf3b2d;">TMH</div>
+        <div class="author-name">Md. Tanvir Mahmud Himel</div>
+        <div class="author-affil">B.Sc. Computer Science &amp; Engineering<br>Comilla University, Comilla, Bangladesh<br><em style="font-size:0.72rem; color: var(--accent);">Student Member, IEEE</em></div>
+        <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=himel028@stud.cou.ac.bd" target="_blank">📧 himel028@stud.cou.ac.bd</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/-himel/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/404himel" target="_blank" class="github"><i class="fab fa-github"></i></a></div>
+      </div>
+      <div class="author-card animate delay-3">
+        <div class="author-avatar" style="background: var(--gold-pale); color: var(--gold);">SD</div>
+        <div class="author-name">Shukdev Datta</div>
+        <div class="author-affil">M.Sc. Computer Science &amp; Engineering<br>University of Dhaka, Bangladesh<br><em style="font-size:0.72rem; color: var(--accent);">Student Member, IEEE</em></div>
+        <div class="author-email"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=shukdev-2021416455@cs.du.ac.bd" target="_blank">📧 shukdev-2021416455@cs.du.ac.bd</a></div>
+        <div class="author-social"><a href="https://www.linkedin.com/in/shukdev-datta-729767144/" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a><a href="https://github.com/shukdevtroy" target="_blank" class="github"><i class="fab fa-github"></i></a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <section id="conclusion">
+    <div class="section-label">Conclusion</div>
+    <h2>Summary &amp; Future Directions</h2>
+
+    <div class="two-col" style="margin-bottom: 2.5rem;">
+      <div>
+        <p>This paper presented <strong>BanglaLiteFormer</strong>, a comprehensive and efficient framework for sentiment analysis of Bangla e-commerce reviews designed specifically for low-resource settings. By combining multi-strategy data augmentation, domain-specific preprocessing, and a purposefully lightweight transformer architecture, we demonstrated that state-of-the-art performance is achievable even with limited annotated training data.</p>
+        <p>Our model attained <strong>97.0% test accuracy</strong> with balanced F1 scores across both sentiment classes, outperforming well-established architectures including Bangla-BERT, bidirectional GRU, bidirectional LSTM, and a five-model transformer ensemble — all while maintaining approximately <strong>150,000 parameters</strong> compared to BERT's 110 million. The 99.48% average prediction confidence further validates that the model produces well-calibrated, reliable outputs on unseen user-generated content.</p>
+        <p>A key theoretical insight of this work is that generalization error scales with the ratio of parameters to training samples. Our single-block architecture achieves a roughly <strong>27× lower generalization error bound</strong> than Bangla-BERT on the same dataset, which directly explains its superior practical performance despite fewer parameters. This finding has broad implications for NLP in low-resource language settings beyond Bangla.</p>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 1rem;">Key Contributions</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+          <div style="display: flex; gap: 0.7rem; align-items: flex-start;">
+            <div style="width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0; margin-top: 0.1rem;">1</div>
+            <p style="margin: 0; font-size: 0.88rem;"><strong>Hybrid augmentation pipeline</strong> — template synthesis, neural paraphrasing (mT5, mBART, BanglaT5), back-translation, and LLM fine-tuning (Qwen 2.5–7B, Bangla-GPT) expanded 1,631 samples to 4,370 while preserving sentiment fidelity.</p>
+          </div>
+          <div style="display: flex; gap: 0.7rem; align-items: flex-start;">
+            <div style="width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0; margin-top: 0.1rem;">2</div>
+            <p style="margin: 0; font-size: 0.88rem;"><strong>Domain-specific preprocessing</strong> — a custom Bangla pipeline handling Unicode normalization, emoji removal, and stopword filtering tailored to e-commerce register.</p>
+          </div>
+          <div style="display: flex; gap: 0.7rem; align-items: flex-start;">
+            <div style="width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0; margin-top: 0.1rem;">3</div>
+            <p style="margin: 0; font-size: 0.88rem;"><strong>BanglaLiteFormer architecture</strong> — single transformer block with hybrid avg+max pooling, providing <strong>144× less attention computation</strong> than BERT-base while exceeding its performance on this task.</p>
+          </div>
+          <div style="display: flex; gap: 0.7rem; align-items: flex-start;">
+            <div style="width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0; margin-top: 0.1rem;">4</div>
+            <p style="margin: 0; font-size: 0.88rem;"><strong>Theoretical justification</strong> — statistical learning theory formalization of why lightweight architectures outperform over-parameterized models on small domain-specific datasets.</p>
+          </div>
+          <div style="display: flex; gap: 0.7rem; align-items: flex-start;">
+            <div style="width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0; margin-top: 0.1rem;">5</div>
+            <p style="margin: 0; font-size: 0.88rem;"><strong>Deployable Gradio application</strong> — an end-to-end real-time inference pipeline with live latency measurement, confidence scoring, and uncertainty flagging.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-icon" style="background: var(--red-pale);">⚠️</div>
+        <h3 style="margin-bottom: 1rem;">Limitations</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Binary classification only</strong> — the model assigns a single polarity label and cannot capture neutral, mixed, or nuanced multi-class sentiment gradations.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Synthetic augmentation risks</strong> — despite semantic filtering, neural paraphrasing may introduce subtle domain inconsistencies or amplify existing biases.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Single domain</strong> — trained on e-commerce product reviews; generalization to political text, news, or social media is not validated.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>No aspect-level analysis</strong> — the model classifies the entire review without identifying which specific aspects (price, quality, delivery) are positive or negative.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Sarcasm and irony</strong> — the architecture has no pragmatic reasoning and is susceptible to misclassifying ironic positive-surface text.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background: var(--blue-pale);">🔭</div>
+        <h3 style="margin-bottom: 1rem;">Future Directions</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Aspect-based sentiment analysis</strong> — extending BanglaLiteFormer to identify and score sentiment at the aspect level (product quality, delivery speed, pricing).</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Emotion detection</strong> — moving beyond binary polarity to multi-class emotion labels (joy, anger, disappointment, surprise) for richer customer insight.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Cross-lingual transfer</strong> — leveraging multilingual pre-training to extend the framework to other low-resource South and Southeast Asian languages.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Code-mixed robustness</strong> — dedicated handling of Banglish (Bangla–English code-switching) which is pervasive in real social media and e-commerce content.</p>
+          <p style="font-size: 0.86rem; margin: 0;"><strong>Larger annotated corpora</strong> — multi-source dataset construction with aspect-level and emotion annotations to push performance boundaries further.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Closing quote -->
+    <div style="margin-top: 2.5rem; background: var(--ink); color: white; border-radius: 16px; padding: 2rem 1.5rem; text-align: center; position: relative; overflow: hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(26,107,60,0.3) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 50%,rgba(26,74,107,0.25) 0%,transparent 60%);"></div>
+      <div style="position:relative;z-index:1;">
+        <p style="font-family:'DM Serif Display',serif;font-size:clamp(1rem, 3vw, 1.3rem);font-style:italic;line-height:1.6;color:rgba(255,255,255,0.9);margin-bottom:1rem;max-width:720px;margin-left:auto;margin-right:auto;">"This study demonstrates that state-of-the-art performance can be obtained in a limited-resource scenario utilising a precisely built, lightweight transformer, domain-specific pre-processing, and deliberate data augmentation."</p>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.4);letter-spacing:0.05em;">— BanglaLiteFormer, IEEE Transactions on Artificial Intelligence, 2026</p>
+        <div style="display:flex;justify-content:center;gap:0.6rem;margin-top:1.25rem;flex-wrap:wrap;">
+          <a href="#abstract" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 1rem;">Read Abstract</a>
+          <a href="#results" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 1rem;">View Results</a>
+          <a href="#demo" class="btn" style="background:var(--accent);color:white;font-size:0.8rem;padding:0.5rem 1rem;">Try the Demo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom: 0.5rem; color: navajowhite !important;">
+    <strong style="color: rgba(255,255,255,0.8);">BanglaLiteFormer</strong> · IEEE Transactions on Artificial Intelligence
+  </p>
+  <p style="color: navajowhite;">
+    Tanjin Adnan Abir · Md. Tanvir Mahmud Himel · Shukdev Datta<br>
+    Jahangirnagar University · Comilla University · University of Dhaka
+  </p>
+  <p style="margin-top: 0.5rem; font-size: 0.74rem; color: navajowhite;">
+    Acknowledged: <a href="https://openai.com">ChatGPT (OpenAI)</a> and <a href="https://anthropic.com">Claude (Anthropic)</a> for assisting in drafting portions of this manuscript.
+  </p>
+</footer>
+
+<!-- SCROLL TO TOP -->
+<button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Scroll to top">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="8 12 12 8 16 12"/>
+    <line x1="12" y1="8" x2="12" y2="16"/>
+  </svg>
+</button>
+
+<script>
+  // ─── HAMBURGER MENU ───
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+
+  function closeMobileNav() {
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+  }
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!hamburger.contains(e.target) && !mobileNav.contains(e.target)) {
+      closeMobileNav();
+    }
+  });
+
+  // ─── ANIMATE ON SCROLL ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+  // metric bar animation now handled by slider's sliderObserver + animateSlideBars()
+
+  // ─── SCROLL TO TOP ───
+  const scrollBtn = document.getElementById('scroll-top-btn');
+  window.addEventListener('scroll', () => {
+    scrollBtn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+
+  // ─── FULLSCREEN DEMO ───
+  function toggleFullscreen() {
+    const demo = document.getElementById("demoBox");
+    demo.classList.toggle("fullscreen");
+    document.body.style.overflow = demo.classList.contains("fullscreen") ? "hidden" : "auto";
+  }
+
+  // ─── DEMO LOADER ───
+  function hideLoader() {
+    const loader = document.getElementById("demoLoader");
+    loader.classList.add("hide");
+  }
+
+  // ─── METRICS SLIDER ───
+  let currentSlide = 0;
+  const totalSlides = 3;
+  const track = document.getElementById('metricsTrack');
+  const barsAnimated = [false, false, false];
+
+  function updateSlider(index) {
+    currentSlide = Math.max(0, Math.min(index, totalSlides - 1));
+    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    document.querySelectorAll('.mslider-tab').forEach((t, i) => t.classList.toggle('active', i === currentSlide));
+    document.querySelectorAll('.mslider-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+    document.getElementById('metricsPrev').disabled = currentSlide === 0;
+    document.getElementById('metricsNext').disabled = currentSlide === totalSlides - 1;
+    animateSlideBars(currentSlide);
+  }
+
+  function moveSlide(dir) { updateSlider(currentSlide + dir); }
+  function goSlide(i) { updateSlider(i); }
+
+  function animateSlideBars(slideIndex) {
+    if (barsAnimated[slideIndex]) return;
+    barsAnimated[slideIndex] = true;
+    const slide = track.querySelectorAll('.mslider-slide')[slideIndex];
+    slide.querySelectorAll('.metric-bar-fill[data-width]').forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.getAttribute('data-width') + '%'; }, 80);
+    });
+    slide.querySelectorAll('.cw-bar-fill[data-cw]').forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.getAttribute('data-cw') + '%'; }, 120);
+    });
+  }
+
+  // Tab click
+  document.querySelectorAll('.mslider-tab').forEach(tab => {
+    tab.addEventListener('click', () => goSlide(parseInt(tab.dataset.slide)));
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  if (track) {
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) moveSlide(diff > 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
+  // Keyboard arrows
+  document.addEventListener('keydown', e => {
+    const wrap = document.querySelector('.metrics-slider-wrap');
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      if (e.key === 'ArrowRight') moveSlide(1);
+      if (e.key === 'ArrowLeft') moveSlide(-1);
+    }
+  });
+
+  // Trigger bar animation when slider scrolls into view
+  const sliderObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) animateSlideBars(currentSlide); });
+  }, { threshold: 0.3 });
+  const sliderWrap = document.querySelector('.metrics-slider-wrap');
+  if (sliderWrap) sliderObserver.observe(sliderWrap);
+
+  // Init slider state
+  updateSlider(0);
+</script>
+
+</body>
+</html>
