@@ -110,6 +110,84 @@
   }
   .nav-btn:hover { background: var(--accent-light) !important; color: white !important; }
 
+  /* ─── READING PROGRESS BAR ─── */
+  #progress-bar {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    border-radius: 0 2px 2px 0;
+    transition: width 0.08s linear;
+    z-index: 201;
+  }
+
+  /* ─── NAV SCROLL-SPY ACTIVE ─── */
+  .nav-links a.nav-active {
+    color: var(--accent) !important;
+    position: relative;
+  }
+  .nav-links a.nav-active:not(.nav-btn)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* ─── CONFUSION MATRIX TOOLTIPS ─── */
+  .cm-cell[data-tip] {
+    cursor: help;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .cm-cell[data-tip]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(13,17,23,0.14);
+    z-index: 10;
+  }
+  .cm-cell[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: rgba(255,255,255,0.92);
+    font-size: 0.73rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    width: 168px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    z-index: 50;
+    box-shadow: 0 4px 20px rgba(13,17,23,0.3);
+  }
+  .cm-cell[data-tip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--ink);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    z-index: 50;
+  }
+  .cm-cell[data-tip]:hover::after,
+  .cm-cell[data-tip]:hover::before { opacity: 1; }
+
   /* ─── HAMBURGER ─── */
   .hamburger {
     display: none;
@@ -1090,6 +1168,7 @@
 
 <!-- NAV -->
 <nav>
+  <div id="progress-bar"></div>
   <div class="nav-inner">
     <div class="nav-logo">BanglaLiteFormer</div>
     <ul class="nav-links">
@@ -1425,15 +1504,15 @@
 
     <div class="three-col" style="margin-bottom: 2.5rem;">
       <div class="stat-card animate delay-1">
-        <div class="stat-num">97.00%</div>
+        <div class="stat-num" data-count="97.00" data-suffix="%" data-decimals="2">97.00%</div>
         <div class="stat-label">Test Accuracy</div>
       </div>
       <div class="stat-card animate delay-2">
-        <div class="stat-num">0.9706</div>
+        <div class="stat-num" data-count="0.9706" data-suffix="" data-decimals="4">0.9706</div>
         <div class="stat-label">Positive F1-Score</div>
       </div>
       <div class="stat-card animate delay-3">
-        <div class="stat-num">0.9692</div>
+        <div class="stat-num" data-count="0.9692" data-suffix="" data-decimals="4">0.9692</div>
         <div class="stat-label">Negative F1-Score</div>
       </div>
     </div>
@@ -1521,18 +1600,18 @@
 
                   <!-- Row 1: Negative actual -->
                   <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Negative</div>
-                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">299<span class="cm-sub">True Neg</span></div>
-                  <div class="cm-cell cm-fn" style="font-size:1.4rem;padding:1rem;">10<span class="cm-sub">False Pos</span></div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;" data-tip="✅ True Negative — Model correctly predicted Negative. Actual: Negative, Predicted: Negative.">299<span class="cm-sub">True Neg</span></div>
+                  <div class="cm-cell cm-fn" style="font-size:1.4rem;padding:1rem;" data-tip="❌ False Positive — Model wrongly predicted Positive. Actual: Negative, Predicted: Positive.">10<span class="cm-sub">False Pos</span></div>
 
                   <!-- Row 2: Positive actual -->
                   <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Positive</div>
-                  <div class="cm-cell cm-fp" style="font-size:1.4rem;padding:1rem;">9<span class="cm-sub">False Neg</span></div>
-                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">314<span class="cm-sub">True Pos</span></div>
+                  <div class="cm-cell cm-fp" style="font-size:1.4rem;padding:1rem;" data-tip="❌ False Negative — Model wrongly predicted Negative. Actual: Positive, Predicted: Negative.">9<span class="cm-sub">False Neg</span></div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;" data-tip="✅ True Positive — Model correctly predicted Positive. Actual: Positive, Predicted: Positive.">314<span class="cm-sub">True Pos</span></div>
 
                 </div><!-- /grid -->
               </div><!-- /flex -->
-              <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;margin-left: 60px;">
-                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--accent-pale);border-radius:10px;border:1px solid rgba(26,107,60,0.2);">
+              <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;">
+                <div style="margin-left:58px;text-align:center;padding:0.75rem 1.25rem;background:var(--accent-pale);border-radius:10px;border:1px solid rgba(26,107,60,0.2);">
                   <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--accent);line-height:1;">613</div>
                   <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Correct</div>
                 </div>
@@ -1848,6 +1927,75 @@
     const loader = document.getElementById("demoLoader");
     loader.classList.add("hide");
   }
+
+  // ════════════════════════════════════════════
+  // 1. READING PROGRESS BAR
+  // ════════════════════════════════════════════
+  const progressBar = document.getElementById('progress-bar');
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgressBar, { passive: true });
+
+  // ════════════════════════════════════════════
+  // 2. NAV SCROLL-SPY
+  // ════════════════════════════════════════════
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+
+  function updateScrollSpy() {
+    const scrollY = window.scrollY + 80; // offset for sticky nav height
+    let currentId = '';
+    sections.forEach(sec => {
+      if (sec.offsetTop <= scrollY) currentId = sec.id;
+    });
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href').replace('#','');
+      link.classList.toggle('nav-active', href === currentId && !link.classList.contains('nav-btn'));
+    });
+  }
+  window.addEventListener('scroll', updateScrollSpy, { passive: true });
+  updateScrollSpy(); // run once on load
+
+  // ════════════════════════════════════════════
+  // 3. ANIMATED STAT COUNTERS
+  // ════════════════════════════════════════════
+  function animateCounter(el) {
+    const target   = parseFloat(el.dataset.count);
+    const suffix   = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const duration = 1400; // ms
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = eased * target;
+      el.textContent = value.toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+      else el.textContent = target.toFixed(decimals) + suffix; // ensure exact final value
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        animateCounter(el);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-num[data-count]').forEach(el => {
+    counterObserver.observe(el);
+  });
 
   // ─── METRICS SLIDER ───
   let currentSlide = 0;
