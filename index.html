@@ -705,6 +705,133 @@
   }
   .strip-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.65); font-weight: 500; }
 
+  /* ─── METRICS SLIDER ─── */
+  .metrics-slider-wrap { position: relative; }
+  .mslider-tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    border-bottom: none;
+  }
+  .mslider-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: white;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .mslider-tab:last-child { border-right: none; }
+  .mslider-tab:hover { background: var(--cream); color: var(--accent); }
+  .mslider-tab.active { color: var(--accent); background: var(--accent-pale); border-bottom-color: var(--accent); }
+  .mslider-tab-icon { font-size: 1rem; line-height: 1; }
+  .mslider-outer {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    background: var(--cream);
+    box-shadow: var(--shadow);
+  }
+  .mslider-track {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .mslider-slide { flex: 0 0 100%; width: 100%; padding: 1.75rem 1.5rem 2rem; }
+  .mslider-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    min-height: 280px;
+  }
+  .mslider-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .mslider-card-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-pale);
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+  }
+  .mslider-card-counter { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+  .mslider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+  }
+  .mslider-arrow:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .mslider-arrow:disabled { opacity: 0.3; cursor: default; }
+  .mslider-prev { left: 0.6rem; }
+  .mslider-next { right: 0.6rem; }
+  .mslider-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+  .mslider-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    padding: 0;
+  }
+  .mslider-dot.active { background: var(--accent); width: 24px; border-radius: 100px; }
+  .mslider-dot:hover:not(.active) { background: var(--muted); }
+  .cw-class-block { border-radius: 10px; padding: 1rem 1.1rem; }
+  .cw-class-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .cw-bars { display: flex; flex-direction: column; gap: 0.55rem; }
+  .cw-bar-row { display: flex; align-items: center; gap: 0.6rem; }
+  .cw-bar-label { font-size: 0.75rem; font-weight: 500; color: var(--muted); width: 62px; flex-shrink: 0; }
+  .cw-bar-track { flex: 1; height: 7px; background: rgba(255,255,255,0.6); border-radius: 100px; overflow: hidden; }
+  .cw-bar-fill { height: 100%; border-radius: 100px; width: 0; transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.2s; }
+  .cw-bar-fill.cw-green { background: var(--accent); }
+  .cw-bar-fill.cw-red { background: var(--red); }
+  .cw-bar-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--ink); width: 44px; text-align: right; flex-shrink: 0; }
+  @media (max-width: 640px) {
+    .mslider-tab-label { display: none; }
+    .mslider-tab { padding: 0.75rem 0.5rem; }
+    .mslider-tab-icon { font-size: 1.2rem; }
+    .mslider-tab.active .mslider-tab-label { display: block; font-size: 0.72rem; }
+    .mslider-arrow { width: 30px; height: 30px; font-size: 0.85rem; }
+    .mslider-card { padding: 1.1rem; min-height: unset; }
+    .mslider-slide { padding: 1.25rem 1rem 1.5rem; }
+  }
+
   /* ─── CONFUSION MATRIX VIZ ─── */
   .cm-grid {
     display: grid;
@@ -1311,66 +1438,159 @@
       </div>
     </div>
 
-    <div class="two-col" style="margin-bottom: 2.5rem;">
-      <div>
-        <h3>Performance Metrics</h3>
-        <div style="margin-top: 1rem;">
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>Accuracy</span><span>97.00%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
-          </div>
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>Precision</span><span>97.00%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
-          </div>
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>Recall</span><span>97.00%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
-          </div>
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>F1-Score (Weighted)</span><span>97.00%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
-          </div>
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>Avg Prediction Confidence</span><span>99.48%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill gold" data-width="99.48"></div></div>
-          </div>
-          <div class="metric-bar-wrap">
-            <div class="metric-bar-header"><span>Validation Accuracy</span><span>98.57%</span></div>
-            <div class="metric-bar-track"><div class="metric-bar-fill blue" data-width="98.57"></div></div>
-          </div>
-        </div>
+    <!-- ─── METRICS SLIDER ─── -->
+    <div class="metrics-slider-wrap" style="margin-bottom: 2.5rem;">
+
+      <!-- Tab Nav -->
+      <div class="mslider-tabs">
+        <button class="mslider-tab active" data-slide="0">
+          <span class="mslider-tab-icon">📊</span>
+          <span class="mslider-tab-label">Performance Metrics</span>
+        </button>
+        <button class="mslider-tab" data-slide="1">
+          <span class="mslider-tab-icon">🔲</span>
+          <span class="mslider-tab-label">Confusion Matrix</span>
+        </button>
+        <button class="mslider-tab" data-slide="2">
+          <span class="mslider-tab-icon">📋</span>
+          <span class="mslider-tab-label">Class-wise Performance</span>
+        </button>
       </div>
-      <div>
-        <h3>Confusion Matrix</h3>
-        <div style="margin-top: 1rem; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem;">
-          <p style="font-size: 0.75rem; text-align: center; color: var(--muted); margin-bottom: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600;">Predicted →</p>
-          <div class="cm-grid">
-            <div class="cm-label"></div>
-            <div class="cm-label">Negative</div>
-            <div class="cm-label">Positive</div>
-            <div class="cm-label" style="writing-mode: vertical-rl; transform: rotate(180deg); padding: 0.5rem 0;">Negative</div>
-            <div class="cm-cell cm-tp">299<span class="cm-sub">True Neg</span></div>
-            <div class="cm-cell cm-fn">10<span class="cm-sub">False Pos</span></div>
-            <div class="cm-label" style="writing-mode: vertical-rl; transform: rotate(180deg); padding: 0.5rem 0;">Positive</div>
-            <div class="cm-cell cm-fp">9<span class="cm-sub">False Neg</span></div>
-            <div class="cm-cell cm-tp">314<span class="cm-sub">True Pos</span></div>
+
+      <!-- Slider Track -->
+      <div class="mslider-outer">
+        <div class="mslider-track" id="metricsTrack">
+
+          <!-- SLIDE 1 — Performance Metrics -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">BanglaLiteFormer · Test Set</span>
+                <span class="mslider-card-counter">1 / 3</span>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Accuracy</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Precision</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Recall</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>F1-Score (Weighted)</span><span style="color:var(--accent);font-weight:700;">97.00%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill" data-width="97"></div></div>
+              </div>
+              <div class="metric-bar-wrap">
+                <div class="metric-bar-header"><span>Avg Prediction Confidence</span><span style="color:var(--gold);font-weight:700;">99.48%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill gold" data-width="99.48"></div></div>
+              </div>
+              <div class="metric-bar-wrap" style="margin-bottom:0;">
+                <div class="metric-bar-header"><span>Validation Accuracy</span><span style="color:var(--blue);font-weight:700;">98.57%</span></div>
+                <div class="metric-bar-track"><div class="metric-bar-fill blue" data-width="98.57"></div></div>
+              </div>
+            </div>
           </div>
-          <p style="font-size: 0.72rem; text-align: center; color: var(--muted); margin-top: 0.75rem;">← Actual</p>
-          <p style="font-size: 0.82rem; text-align: center; color: var(--ink); margin-top: 0.5rem; font-weight: 500;">Misclassification rate: <strong style="color: var(--accent);">&lt; 2%</strong></p>
-        </div>
-        <div style="margin-top: 1rem; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; overflow-x: auto;">
-          <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Class-wise Performance</p>
-          <table style="font-size: 0.8rem; min-width: 300px;">
-            <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Negative</strong></td><td>0.9708</td><td>0.9676</td><td>0.9692</td><td>309</td></tr>
-              <tr><td><strong>Positive</strong></td><td>0.9691</td><td>0.9721</td><td>0.9706</td><td>323</td></tr>
-            </tbody>
-          </table>
-        </div>
+
+          <!-- SLIDE 2 — Confusion Matrix -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">Test Set · 632 Samples</span>
+                <span class="mslider-card-counter">2 / 3</span>
+              </div>
+              <!-- PREDICTED → label at top -->
+              <p style="font-size:0.72rem;text-align:center;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">Predicted →</p>
+
+              <!-- Outer flex: [← Actual label] + [full grid] -->
+              <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+
+                <!-- ← Actual rotated label on the LEFT -->
+                <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;">← Actual</div>
+
+                <!-- Grid: 3 columns — row-label | col1 | col2 -->
+                <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:5px;flex:1;max-width:340px;">
+
+                  <!-- Header row -->
+                  <div></div><!-- top-left empty corner -->
+                  <div style="text-align:center;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:0.3rem 0;">Negative</div>
+                  <div style="text-align:center;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:0.3rem 0;">Positive</div>
+
+                  <!-- Row 1: Negative actual -->
+                  <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Negative</div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">299<span class="cm-sub">True Neg</span></div>
+                  <div class="cm-cell cm-fn" style="font-size:1.4rem;padding:1rem;">10<span class="cm-sub">False Pos</span></div>
+
+                  <!-- Row 2: Positive actual -->
+                  <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0 0.25rem;">Positive</div>
+                  <div class="cm-cell cm-fp" style="font-size:1.4rem;padding:1rem;">9<span class="cm-sub">False Neg</span></div>
+                  <div class="cm-cell cm-tp" style="font-size:1.4rem;padding:1rem;">314<span class="cm-sub">True Pos</span></div>
+
+                </div><!-- /grid -->
+              </div><!-- /flex -->
+              <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;margin-left: 60px;">
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--accent-pale);border-radius:10px;border:1px solid rgba(26,107,60,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--accent);line-height:1;">613</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Correct</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--red-pale);border-radius:10px;border:1px solid rgba(192,57,43,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--red);line-height:1;">19</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Errors</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem 1.25rem;background:var(--gold-pale);border-radius:10px;border:1px solid rgba(201,151,58,0.2);">
+                  <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--gold);line-height:1;">&lt;2%</div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-top:0.2rem;">Error Rate</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 3 — Class-wise Performance -->
+          <div class="mslider-slide">
+            <div class="mslider-card">
+              <div class="mslider-card-header">
+                <span class="mslider-card-badge">Per-Class Breakdown</span>
+                <span class="mslider-card-counter">3 / 3</span>
+              </div>
+              <!-- Negative class -->
+              <div class="cw-class-block" style="border-left:4px solid var(--red);background:var(--red-pale);">
+                <div class="cw-class-title" style="color:var(--red);">😠 Negative Class <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">Support: 309</span></div>
+                <div class="cw-bars">
+                  <div class="cw-bar-row"><span class="cw-bar-label">Precision</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="97.08"></div></div><span class="cw-bar-val">0.9708</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">Recall</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="96.76"></div></div><span class="cw-bar-val">0.9676</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">F1-Score</span><div class="cw-bar-track"><div class="cw-bar-fill cw-red" data-cw="96.92"></div></div><span class="cw-bar-val">0.9692</span></div>
+                </div>
+              </div>
+              <!-- Positive class -->
+              <div class="cw-class-block" style="border-left:4px solid var(--accent);background:var(--accent-pale);margin-top:1rem;margin-bottom:0;">
+                <div class="cw-class-title" style="color:var(--accent);">😊 Positive Class <span style="font-size:0.72rem;font-weight:400;color:var(--muted);">Support: 323</span></div>
+                <div class="cw-bars">
+                  <div class="cw-bar-row"><span class="cw-bar-label">Precision</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="96.91"></div></div><span class="cw-bar-val">0.9691</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">Recall</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="97.21"></div></div><span class="cw-bar-val">0.9721</span></div>
+                  <div class="cw-bar-row"><span class="cw-bar-label">F1-Score</span><div class="cw-bar-track"><div class="cw-bar-fill cw-green" data-cw="97.06"></div></div><span class="cw-bar-val">0.9706</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /track -->
+
+        <!-- Arrow buttons -->
+        <button class="mslider-arrow mslider-prev" id="metricsPrev" onclick="moveSlide(-1)" aria-label="Previous">&#8592;</button>
+        <button class="mslider-arrow mslider-next" id="metricsNext" onclick="moveSlide(1)" aria-label="Next">&#8594;</button>
       </div>
-    </div>
+
+      <!-- Dot indicators -->
+      <div class="mslider-dots">
+        <button class="mslider-dot active" data-slide="0" onclick="goSlide(0)"></button>
+        <button class="mslider-dot" data-slide="1" onclick="goSlide(1)"></button>
+        <button class="mslider-dot" data-slide="2" onclick="goSlide(2)"></button>
+      </div>
+
+    </div><!-- /metrics-slider-wrap -->
 
     <h3 style="margin-bottom: 1rem;">Comparison with Ahmed et al. (2023) — Retrained on Our Dataset</h3>
     <div class="table-wrap animate" style="margin-bottom: 2rem;">
@@ -1608,19 +1828,7 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.animate').forEach(el => observer.observe(el));
 
-  // ─── ANIMATE METRIC BARS ───
-  const barObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.querySelectorAll('.metric-bar-fill').forEach(bar => {
-          bar.style.width = bar.getAttribute('data-width') + '%';
-        });
-        barObserver.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.3 });
-  const barSection = document.getElementById('results');
-  if (barSection) barObserver.observe(barSection);
+  // metric bar animation now handled by slider's sliderObserver + animateSlideBars()
 
   // ─── SCROLL TO TOP ───
   const scrollBtn = document.getElementById('scroll-top-btn');
@@ -1640,6 +1848,73 @@
     const loader = document.getElementById("demoLoader");
     loader.classList.add("hide");
   }
+
+  // ─── METRICS SLIDER ───
+  let currentSlide = 0;
+  const totalSlides = 3;
+  const track = document.getElementById('metricsTrack');
+  const barsAnimated = [false, false, false];
+
+  function updateSlider(index) {
+    currentSlide = Math.max(0, Math.min(index, totalSlides - 1));
+    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    document.querySelectorAll('.mslider-tab').forEach((t, i) => t.classList.toggle('active', i === currentSlide));
+    document.querySelectorAll('.mslider-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+    document.getElementById('metricsPrev').disabled = currentSlide === 0;
+    document.getElementById('metricsNext').disabled = currentSlide === totalSlides - 1;
+    animateSlideBars(currentSlide);
+  }
+
+  function moveSlide(dir) { updateSlider(currentSlide + dir); }
+  function goSlide(i) { updateSlider(i); }
+
+  function animateSlideBars(slideIndex) {
+    if (barsAnimated[slideIndex]) return;
+    barsAnimated[slideIndex] = true;
+    const slide = track.querySelectorAll('.mslider-slide')[slideIndex];
+    slide.querySelectorAll('.metric-bar-fill[data-width]').forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.getAttribute('data-width') + '%'; }, 80);
+    });
+    slide.querySelectorAll('.cw-bar-fill[data-cw]').forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.getAttribute('data-cw') + '%'; }, 120);
+    });
+  }
+
+  // Tab click
+  document.querySelectorAll('.mslider-tab').forEach(tab => {
+    tab.addEventListener('click', () => goSlide(parseInt(tab.dataset.slide)));
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  if (track) {
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) moveSlide(diff > 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
+  // Keyboard arrows
+  document.addEventListener('keydown', e => {
+    const wrap = document.querySelector('.metrics-slider-wrap');
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      if (e.key === 'ArrowRight') moveSlide(1);
+      if (e.key === 'ArrowLeft') moveSlide(-1);
+    }
+  });
+
+  // Trigger bar animation when slider scrolls into view
+  const sliderObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) animateSlideBars(currentSlide); });
+  }, { threshold: 0.3 });
+  const sliderWrap = document.querySelector('.metrics-slider-wrap');
+  if (sliderWrap) sliderObserver.observe(sliderWrap);
+
+  // Init slider state
+  updateSlider(0);
 </script>
 
 </body>
